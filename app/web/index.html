@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RAG Evaluation Platform</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="gov-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">mos.ru</span>
+          <div>
+            <p class="kicker">Демо-стенд для внутренней базы знаний</p>
+            <h1>ИИ-помощник по документам центров Департамента</h1>
+          </div>
+        </div>
+        <nav class="header-nav" aria-label="Demo navigation">
+          <a href="/docs" target="_blank" rel="noreferrer">API</a>
+          <a href="#assistant">Ассистент</a>
+          <a href="#pipeline">Пайплайн</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">В стилистике городского сервиса</p>
+          <h2>Изучение регламентов, инструкций и материалов центров</h2>
+          <p>
+            Мини-версия будущей платформы: сейчас работает LLM-чат, дальше добавим загрузку
+            документов Департамента, поиск по фрагментам, цитаты на источники и оценку
+            качества ответов.
+          </p>
+        </div>
+        <div class="service-card">
+          <span class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 3h8l4 4v14H6z" />
+              <path d="M14 3v5h5" />
+              <path d="M9 13h6" />
+              <path d="M9 17h4" />
+            </svg>
+          </span>
+          <div>
+            <h3>Документы центра</h3>
+            <p>Помощь в разборе регламентов, памяток, инструкций и описаний услуг.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <aside class="sidebar" aria-label="Project status">
+          <section class="panel" id="pipeline">
+          <h2>Сценарий</h2>
+          <ol class="pipeline">
+            <li class="active">
+              <span class="step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 3a7 7 0 0 0-7 7c0 4 7 11 7 11s7-7 7-11a7 7 0 0 0-7-7z" />
+                  <path d="M12 8v4l3 2" />
+                </svg>
+              </span>
+              Помощник
+            </li>
+            <li>
+              <span class="step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M6 3h9l3 3v15H6z" />
+                  <path d="M9 12h6" />
+                  <path d="M9 16h4" />
+                </svg>
+              </span>
+              Документы центра
+            </li>
+            <li>
+              <span class="step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 7h16" />
+                  <path d="M4 12h10" />
+                  <path d="M4 17h16" />
+                </svg>
+              </span>
+              Разделы и фрагменты
+            </li>
+            <li>
+              <span class="step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="10" cy="10" r="5" />
+                  <path d="m14 14 5 5" />
+                </svg>
+              </span>
+              Поиск по базе
+            </li>
+            <li>
+              <span class="step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="m5 12 4 4L19 6" />
+                </svg>
+              </span>
+              Проверка ответа
+            </li>
+          </ol>
+        </section>
+
+        <section class="panel">
+          <h2>Подключение</h2>
+          <dl class="runtime">
+            <div>
+              <dt>Провайдер</dt>
+              <dd id="providerValue">OpenRouter</dd>
+            </div>
+            <div>
+              <dt>Статус</dt>
+              <dd id="statusValue">Готов</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <section class="workspace" id="assistant" aria-label="Chat workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Работа с документами Департамента</p>
+            <h2>Ассистент центра</h2>
+          </div>
+          <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">Документация API</a>
+        </header>
+
+        <section id="messages" class="messages" aria-live="polite">
+          <article class="message assistant">
+            <span class="avatar" aria-hidden="true">AI</span>
+            <div class="bubble">
+              <p>Задай вопрос по регламенту, памятке, инструкции или описанию услуги центра.</p>
+            </div>
+          </article>
+        </section>
+
+        <form id="chatForm" class="composer">
+          <label class="visually-hidden" for="messageInput">Message</label>
+          <textarea
+            id="messageInput"
+            name="message"
+            rows="3"
+            placeholder="Например: какие документы нужны для получения услуги?"
+            autocomplete="off"
+            required
+          ></textarea>
+          <button id="sendButton" type="submit" aria-label="Send message">
+            <span>Отправить</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M22 2 11 13" />
+              <path d="m22 2-7 20-4-9-9-4Z" />
+            </svg>
+          </button>
+        </form>
+      </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
