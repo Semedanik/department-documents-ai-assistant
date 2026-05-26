@@ -1,72 +1,129 @@
 # Department Documents AI Assistant
 
-Демо-платформа ИИ-помощника для изучения документов, регламентов, инструкций и материалов центров Департамента.
+AI assistant for navigating department center documents, regulations, instructions, service descriptions, and internal knowledge base materials.
 
-Проект показывает, как собрать прикладной AI/LLM-сервис вокруг внутренней базы знаний: пользователь задает вопрос, backend обращается к LLM через независимый слой провайдеров, а web UI показывает ответ в формате городского сервисного интерфейса.
+The project is built as a production-oriented FastAPI service with a provider-agnostic LLM layer and a lightweight web interface. The current version focuses on the conversational LLM layer; the architecture is prepared for document ingestion, retrieval, citations, and RAG quality evaluation.
 
-Сейчас реализовано:
+## Use Case
 
-- FastAPI-приложение;
-- конфигурация через `.env`;
-- абстракция `LLMProvider`;
-- реализации `OpenRouterProvider` и `GeminiProvider`;
-- endpoint `POST /chat`;
-- web UI на `/` в стилистике городского сервиса;
-- базовая структура, которую дальше можно расширять до полноценной RAG-платформы по документам.
+Employees and operators often need to find precise information across internal documents: service rules, required documents, process steps, deadlines, responsibilities, and exceptions. This assistant is designed to reduce manual search time and provide a structured entry point into a document knowledge base.
 
-## Сценарий продукта
+Example questions:
 
-Целевая идея проекта - помощник для сотрудников или операторов, которым нужно быстро разобраться в документах центра:
+- What documents are required for a specific service?
+- Which regulation describes this process?
+- What are the steps for handling a citizen request?
+- Who is responsible for a specific workflow stage?
+- Which source document should be checked before answering?
 
-- найти требования из регламента;
-- объяснить порядок оказания услуги;
-- уточнить список документов;
-- разобрать памятку или инструкцию;
-- получить ответ с цитатами на источники;
-- в будущем проверить качество ответа через eval-модуль.
+## Current Features
 
-## Почему начинаем с LLMProvider
+- FastAPI backend with typed request and response schemas.
+- Web UI for interacting with the assistant.
+- Provider-agnostic LLM interface.
+- OpenRouter integration.
+- Gemini integration.
+- Environment-based configuration.
+- Health endpoint.
+- Swagger/OpenAPI documentation.
+- Clear project structure for future RAG modules.
 
-LLM-провайдеры часто отличаются API, форматом сообщений, именами моделей, лимитами и ошибками. Если бизнес-логика напрямую вызывает OpenRouter или Gemini, проект быстро становится связанным с конкретным сервисом.
+## Tech Stack
 
-`LLMProvider` решает это так:
+- Python 3.11+
+- FastAPI
+- Pydantic / pydantic-settings
+- httpx
+- OpenRouter API
+- Gemini API
+- HTML, CSS, JavaScript
 
-1. Приложение работает с единым методом `chat`.
-2. Конкретный провайдер прячет внутри себя HTTP-запросы и формат ответа.
-3. В будущем RAG-цепочка сможет вызывать LLM одинаково, независимо от провайдера.
-
-## Структура
+## Architecture
 
 ```text
-rag-evaluation-platform/
-  app/
-    core/config.py
-    llm/base.py
-    llm/factory.py
-    llm/openrouter.py
-    llm/gemini.py
-    schemas/chat.py
-    web/index.html
-    web/styles.css
-    web/app.js
-    main.py
-  .env.example
-  .gitignore
-  pyproject.toml
-  README.md
+User
+  |
+  v
+Web UI
+  |
+  v
+FastAPI API
+  |
+  v
+LLMProvider interface
+  |
+  +-- OpenRouterProvider
+  |
+  +-- GeminiProvider
 ```
 
-## Быстрый старт
+The backend does not depend directly on a specific LLM provider. Application logic calls a shared `LLMProvider` interface, while provider adapters handle API-specific payloads, headers, models, and response parsing.
+
+This design allows the project to add new providers or switch models without rewriting the application layer.
+
+## Project Structure
+
+```text
+app/
+  core/
+    config.py          # environment-based settings
+  llm/
+    base.py            # provider interface and shared data models
+    factory.py         # provider selection
+    openrouter.py      # OpenRouter adapter
+    gemini.py          # Gemini adapter
+  schemas/
+    chat.py            # API request/response schemas
+  web/
+    index.html         # web UI
+    styles.css         # UI styles
+    app.js             # browser-side chat logic
+  main.py              # FastAPI application
+```
+
+## API
+
+### `GET /health`
+
+Returns service status.
+
+```json
+{
+  "status": "ok"
+}
+```
+
+### `POST /chat`
+
+Sends a user question to the configured LLM provider.
+
+Request:
+
+```json
+{
+  "message": "Какие вопросы можно задавать по документам центра?"
+}
+```
+
+Response:
+
+```json
+{
+  "answer": "...",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini"
+}
+```
+
+## Configuration
+
+Create a local `.env` file from the example:
 
 ```bash
-cd rag-evaluation-platform
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
 cp .env.example .env
 ```
 
-Заполните `.env`:
+OpenRouter:
 
 ```env
 LLM_PROVIDER=openrouter
@@ -74,7 +131,7 @@ OPENROUTER_API_KEY=your_key
 OPENROUTER_MODEL=openai/gpt-4o-mini
 ```
 
-Или для Gemini:
+Gemini:
 
 ```env
 LLM_PROVIDER=gemini
@@ -82,9 +139,14 @@ GEMINI_API_KEY=your_key
 GEMINI_MODEL=gemini-2.5-flash
 ```
 
-Запуск:
+Secrets are loaded from environment variables and must not be committed to the repository.
+
+## Local Development
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
 uvicorn app.main:app --reload
 ```
 
@@ -94,55 +156,37 @@ Web UI:
 http://127.0.0.1:8000/
 ```
 
-Swagger UI:
+OpenAPI docs:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Проверка:
+Example request:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/chat \
   -H "Content-Type: application/json" \
-  -d '{"message":"Какие вопросы можно задавать по документам центра?"}'
+  -d '{"message":"Какие документы нужны для получения услуги?"}'
 ```
 
-## Что важно понять на этом шаге
+## Security Notes
 
-- `FastAPI` отвечает только за HTTP-слой: принять запрос, провалидировать данные, вернуть ответ.
-- `LLMProvider` - это контракт. Он говорит приложению: "любой провайдер обязан уметь отвечать на chat-запрос".
-- `OpenRouterProvider` и `GeminiProvider` - это адаптеры. Они переводят наш внутренний формат в формат конкретного API.
-- `.env` отделяет настройки и секреты от кода.
-- Web UI не содержит LLM-логики. Он только отправляет пользовательский текст в `/chat` и показывает ответ пользователю.
-- Такой дизайн позволит позже добавить документы, retrieval, reranking, citations и eval, не переписывая слой LLM-интеграций.
+- API keys are stored only in environment variables.
+- `.env` is excluded from git.
+- The assistant is instructed to distinguish facts from assumptions and request source documents when needed.
+- For production usage, add authentication, request limits, audit logs, and stricter source-grounding through retrieval and citations.
 
-## Как дать попробовать другим
+## Roadmap
 
-Для локальной демки можно открыть сайт на своем компьютере:
-
-```text
-http://127.0.0.1:8000/
-```
-
-Чтобы дать временную ссылку другому человеку, поднимите сервер и используйте туннель:
-
-```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000
-ngrok http 8000
-```
-
-Для постоянного публичного доступа лучше деплоить backend на VPS, Render, Railway или Fly.io и хранить API-ключи только в переменных окружения сервера.
-
-## Следующий этап
-
-Следующим логичным шагом будет добавить:
-
-1. загрузку документов;
-2. парсинг PDF/DOCX/HTML/TXT;
-3. chunking документов центра;
-4. embeddings provider;
-5. локальную vector DB;
-6. endpoint для индексации документов;
-7. ответы с цитатами;
-8. eval-модуль для проверки качества ответов.
+- Document upload for PDF, DOCX, HTML, and TXT.
+- Document parsing and normalization.
+- Chunking strategy for regulations and instructions.
+- Embeddings provider abstraction.
+- Vector database integration.
+- Retrieval endpoint.
+- Reranking layer.
+- Answers with source citations.
+- RAG evaluation module for faithfulness, relevance, and context quality.
+- Latency and cost logging.
+- Docker Compose setup.
